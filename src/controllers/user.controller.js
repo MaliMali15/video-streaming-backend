@@ -6,8 +6,6 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 const userRegister=asyncHandler( async (req , res) => {
     const{username,email,fullName,password}=req.body
-    console.log(email,username);
-    
     // if(username==="" || email==="" || fullName==="" || password===""){
     //     throw new ApiError(409,"All fields are required")
     // }
@@ -23,10 +21,15 @@ const userRegister=asyncHandler( async (req , res) => {
     }
 
     const avatarPath=req.files?.avatar[0]?.path
-    const coverImagePath=req.files?.coverImage[0]?.path
+    let coverImagePath;
+    const coverimage=req.files?.coverImage
 
     if(!avatarPath){
         throw new ApiError(400,"Avatar is required")
+    }
+
+    if(coverimage){
+        coverImagePath=coverimage[0].path
     }
 
     const avatar=await cloudinaryUpload(avatarPath)
@@ -38,10 +41,11 @@ const userRegister=asyncHandler( async (req , res) => {
 
     const user = await User.create({
         username:username.toLowerCase(),
-        fullname,
+        fullName,
         password,
+        email,
         avatar:avatar.url,
-        coverImage:coverImage.url || ""
+        coverImage:coverImage?coverImage.url: ""
     })
 
     const createdUser=await User.findById(user._id).select("-password -refreshToken")
