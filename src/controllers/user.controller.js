@@ -1,6 +1,7 @@
 import asyncHandler from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
+import { subscription } from "../models/subscription.model.js";
 import cloudinaryUpload from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
@@ -342,4 +343,76 @@ const updateCoverImage=asyncHandler( async (req , res) => {
     ))
 })
 
-export {userRegister,userLogin,userLogout,tokenRefresher,changePassword,getCurrentUser,updateAccountDetails,updateAvatar,updateCoverImage}
+const getChannelInfo=asyncHandler( async(req , res)=>{
+    const {username}=req.params
+
+    if(!username){
+        throw new ApiError(404,"User doesnt exist")
+    }
+
+    const channel=await User.aggregate([
+        {
+            $match:{
+                username:username
+            }
+        },
+
+        {
+            $lookup:{
+                from:"subscriptions",
+                localField:"_id",
+                foreignField:"subscribedTo",
+                as:"subscribers"
+            }
+        },
+        {
+            $lookup:{
+                from:"subscriptions",
+                localField:"_id",
+                foreignField:"subscriber",
+                as:"channelsSubscribed"
+            }
+        },
+        {
+            $addFields:{
+                subscribersCount:{
+                    $size:"$subscribers"
+                },
+                channelsSubscribedCount:{
+                    $size:"$channelsSubscribed"
+                },
+                isSubscribed:{
+                    $cond:{
+                        if:{$in:[req.user?._id,"$subscribers.subscriber"]},
+                        then:true,
+                        else:false
+                    }
+                    
+                }
+            }    
+        },
+        {
+            $project:{
+                username:1,
+                avatar:1,
+                coverImage:1,
+                createdAt:1,
+                updatedAt:1
+            }
+        }
+    ])
+
+    if(!channel.length){
+        throw new ApiError(404,"Channel doesnt exist")
+    }
+        
+    console.log(channel);
+
+    return res.status(200).json(new ApiResponse(
+        200,
+        channel[0],
+        "Channel retrieved successfully"
+    ))
+})
+
+export {userRegister,userLogin,userLogout,tokenRefresher,changePassword,getCurrentUser,updateAccountDetails,updateAvatar,updateCoverImage,getChannelInfo}
