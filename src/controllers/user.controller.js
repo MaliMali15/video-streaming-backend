@@ -1,10 +1,10 @@
 import asyncHandler from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { subscription } from "../models/subscription.model.js";
 import cloudinaryUpload from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose";
 
 
 const generateAccessandRefreshToken=async (userId) => {
@@ -26,10 +26,10 @@ const generateAccessandRefreshToken=async (userId) => {
         }
     }
 
-    const options={
-        httpOnly: true,
-        secure: true
-    }
+const options={
+    httpOnly: true,
+    secure: true
+}
 
 
 const userRegister=asyncHandler( async (req , res) => {
@@ -415,4 +415,85 @@ const getChannelInfo=asyncHandler( async(req , res)=>{
     ))
 })
 
-export {userRegister,userLogin,userLogout,tokenRefresher,changePassword,getCurrentUser,updateAccountDetails,updateAvatar,updateCoverImage,getChannelInfo}
+const getWatchHistory = asyncHandler(async (req, res) => {
+    const user = await User.aggregate([
+        {
+            $match: {
+                _id:new mongoose.Types.ObjectId(req.user._id)
+            }
+        },
+        {
+            $lookup: {
+                from: "videos",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "watchedVideos",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        username: 1,
+                                        avatar: 1,
+                                        coverImage:1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields: {
+                            $unwind:"$owner"
+                        }
+                    }
+                ]
+            } 
+        }
+    ])
+
+    return res.status(200).json(
+        new ApiResponse(200,user[0].watchedVideos,"Watch history fetched successfully")
+    )
+})
+
+// getWatchHistory using populate (easier less code)
+// Note: this will return an array of video documents corresponding to the videoIds 
+// stored in the watchHistory field of user(which is defined as an array in the user schema)
+
+// const getWatchHistory = asyncHandler(async (req, res) => {
+//     const user = await User.findById(req.user?._id)
+//         .populate({
+//             path: "watchHistory",
+//             populate: {
+//                 path: "owner",
+//                 select:" username avatar coverImage"
+//             }
+//         }) 
+//     return res.status(200).json(
+//         new ApiResponse(
+//             200,
+//             user.watchHistory,
+//             "Watch history fetched successfully"
+//         )
+//     )
+// })
+
+
+export {
+    userRegister,
+    userLogin,
+    userLogout,
+    tokenRefresher,
+    changePassword,
+    getCurrentUser,
+    updateAccountDetails,
+    updateAvatar,
+    updateCoverImage,
+    getChannelInfo,
+    getWatchHistory
+}
