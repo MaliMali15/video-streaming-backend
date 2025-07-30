@@ -448,7 +448,10 @@ const getWatchHistory = asyncHandler(async (req, res) => {
                     },
                     {
                         $addFields: {
-                            $unwind:"$owner"
+                            owner: {
+                                $first:"$owner"
+                            }
+                            
                         }
                     }
                 ]
@@ -462,8 +465,10 @@ const getWatchHistory = asyncHandler(async (req, res) => {
 })
 
 // getWatchHistory using populate (easier less code)
-// Note: this will return an array of video documents corresponding to the videoIds 
+// Note: this will return an array of video documents corresponding to the videoIds
 // stored in the watchHistory field of user(which is defined as an array in the user schema)
+// doesnt work when video schema doesnt exist (the videoschema whose id is stored in watch history for populate to populate the field)
+// contrary to this using lookup works even if there is no video schema it just returns an empty array
 
 // const getWatchHistory = asyncHandler(async (req, res) => {
 //     const user = await User.findById(req.user?._id)
