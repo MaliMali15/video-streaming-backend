@@ -14,14 +14,16 @@ app.use(express.urlencoded({extended:true,limit:"20kb"}))
 app.use(express.static("public"))
 app.use(cookieParser())
 
-import userRouter from "./routes/user.router.js"
-import subscriptionRouter from "./routes/subscription.router.js"
-import playlistRouter from "./routes/playlist.router.js"
-import likeRouter from "./routes/like.router.js"
+import userRouter from "./routes/user.routes.js"
+import subscriptionRouter from "./routes/subscription.routes.js"
+import playlistRouter from "./routes/playlist.routes.js"
+import likeRouter from "./routes/like.routes.js"
+import commentRouter from "./routes/comment.routes.js"
 
 app.use("/user", userRouter)
 app.use("/subscriptions", subscriptionRouter)
 app.use("/playlist", playlistRouter)
-app.use("/likes",likeRouter)
+app.use("/likes", likeRouter)
+app.use("/comments",commentRouter)
 
 export default app
