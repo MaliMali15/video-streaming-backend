@@ -1,10 +1,19 @@
 import { Subscription } from "../models/subscription.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { ApiError } from "../utils/ApiError.js";
 
 const toggleSubscription = asyncHandler(async (req, res) => {
     const { channelId } = req.params
     const userId = req.user?._id
+
+    if (!channelId) {
+        throw new ApiError(401,"Invalid channel id")
+    }
+
+    if (!userId) {
+        throw new ApiError(401,"Invalid user")
+    }
     
     const subDocument = await Subscription.findOne({
         subscriber: userId,
@@ -37,6 +46,10 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 
 const getChannelSubs = asyncHandler(async (req, res) => {
     const { channelId } = req.params
+
+    if (!channelId) {
+        throw new ApiError(401,"Invalid id")
+    }
 
     const subscribers = await Subscription.aggregate([
         {
@@ -76,6 +89,10 @@ const getChannelSubs = asyncHandler(async (req, res) => {
 
 const getSubscribedChannels = asyncHandler(async (req, res) => {
     const { userId } = req.params
+
+    if (!userId) {
+        throw new ApiError(401,"Invalid username")
+    }
     
     const channelList = await Subscription.aggregate([
         {

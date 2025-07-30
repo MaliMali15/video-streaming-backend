@@ -17,8 +17,10 @@ app.use(cookieParser())
 
 import userRouter from "./routes/user.router.js"
 import subscriptionRouter from "./routes/subscription.router.js"
+import playlistRouter from "./routes/playlist.router.js"
 
 app.use("/user", userRouter)
-app.use("/subscription",subscriptionRouter)
+app.use("/subscriptions", subscriptionRouter)
+app.use("/playlist",playlistRouter)
 
 export default app
