@@ -15,8 +15,10 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 
-import {router} from "./routes/user.router.js"
+import userRouter from "./routes/user.router.js"
+import subscriptionRouter from "./routes/subscription.router.js"
 
-app.use("/user",router)
+app.use("/user", userRouter)
+app.use("/subscription",subscriptionRouter)
 
 export default app
