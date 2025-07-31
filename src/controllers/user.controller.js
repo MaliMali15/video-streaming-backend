@@ -397,7 +397,10 @@ const getChannelInfo=asyncHandler( async(req , res)=>{
                 avatar:1,
                 coverImage:1,
                 createdAt:1,
-                updatedAt:1
+                updatedAt: 1,
+                subscribersCount: 1,
+                channelsSubscribedCount:1
+                
             }
         }
     ])
