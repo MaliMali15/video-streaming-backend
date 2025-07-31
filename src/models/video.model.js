@@ -42,5 +42,7 @@ const videoSchema=new Schema(
     }
 )
 
+videoSchema.index({title:"text", description:"text"})
+
 videoSchema.plugin(mongooseAggregatePaginate)
 export const Video=mongoose.model("Video",videoSchema)
