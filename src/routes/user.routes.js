@@ -20,7 +20,7 @@ router.route("/register").post(upload.fields(
 router.route("/login").post(userLogin)
 
 
-// these are secure/protected routes because they are on the endpoints where user is logged in.
+// these are secure/protected routes because they are on the endpoints where user is logged in/need verification/authentication.
 router.route("/logout").post(jwtVerify,userLogout)
 router.route("/token-refresh").post(tokenRefresher)
 router.route("/change-password").post(jwtVerify,changePassword)

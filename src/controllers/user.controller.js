@@ -48,6 +48,9 @@ const userRegister=asyncHandler( async (req , res) => {
         throw new ApiError(400,"User already exists")
     }
 
+    console.log(req.files);
+    
+
     const avatarPath=req.files?.avatar[0]?.path
     let coverImagePath;
     const coverimage=req.files?.coverImage
@@ -60,6 +63,9 @@ const userRegister=asyncHandler( async (req , res) => {
         coverImagePath=coverimage[0].path
     }
 
+    console.log('Avatar path before upload:', avatarPath)
+    console.log('Cover image path before upload:', coverImagePath)  
+    
     const avatar=await cloudinaryUpload(avatarPath)
     const coverImage=await cloudinaryUpload(coverImagePath)
 
